@@ -92,7 +92,7 @@ local Lista		= require("listaAdj")
 					print("Insira o vertice a ser removido: ")
 					entrada = io.read("*line")
 					if tonumber(entrada) then
-						grafoAdj:AdicionaVertice(tonumber(entrada))
+						grafoAdj:RemoveVertice(tonumber(entrada))
 					else
 						Valor_Invalido()				
 					end
@@ -121,7 +121,7 @@ local Lista		= require("listaAdj")
 						print("Insira o segundo vertice da aresta a ser removida: ")
 						entrada = io.read("*line")
 						if tonumber(entrada) then
-							grafoAdj:AdicionaAresta(vertA, tonumber(entrada))
+							grafoAdj:RemoveAresta(vertA, tonumber(entrada))
 						else
 							Valor_Invalido()
 						end
@@ -170,7 +170,7 @@ local Lista		= require("listaAdj")
 				if opcao == 1 then
 					Leitura()
 				elseif opcao == 2 then
-					Ferramentas_Analise()
+					Ferramentas()
 				elseif opcao == 3 then
 					break
 				end

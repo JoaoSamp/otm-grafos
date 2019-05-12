@@ -11,12 +11,12 @@ local MatrizAdj = {}
 			function matrizAdj:AdicionaVertice( )
 				-- adiciona uma coluna em cada linha com 0
 				for i = 1, #self.matriz do
-					self.matriz[i][#self.matriz + 1] = 0
+					table.insert(self.matriz[i], 0)
 				end
 				-- adiciona uma linha com 0s
-				self.matriz[#self.matriz + 1] = {}
+				table.insert(self.matriz, {})
 				for i = 1, #self.matriz do
-					self.matriz[#self.matriz][i] = 0
+					table.insert(self.matriz[#self.matriz], 0)
 				end
 				print("Vertice "..#self.matriz.." foi adicionado.")
 			end
@@ -53,9 +53,13 @@ local MatrizAdj = {}
 
 			function matrizAdj:RemoveAresta( vertA, vertB )
 				if self.matriz[vertA] and self.matriz[vertB] then
-					self.matriz[vertA][vertB] = 0
-					self.matriz[vertB][vertA] = 0
-					print("Aresta "..vertA.."-"..vertB.." foi removida.")
+					if self.matriz[vertA][vertB] == 1 then
+						self.matriz[vertA][vertB] = 0
+						self.matriz[vertB][vertA] = 0
+						print("Aresta "..vertA.."-"..vertB.." foi removida.")
+					else
+						print("Vertices invalidos!")
+					end
 				else
 					print("Vertices invalidos!")
 				end

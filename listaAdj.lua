@@ -15,7 +15,7 @@ local ListaAdj = {}
 		listaAdj.lista 	= {}
 
 			function listaAdj:AdicionaVertice( )
-				self.lista[#self.lista + 1] = {}
+				table.insert(self.lista, {})
 				print("Vertice "..#self.lista.." foi adicionado.")
 			end
 
@@ -118,13 +118,16 @@ local ListaAdj = {}
 			end
 
 			function listaAdj:RemoveAresta( vertA, vertB )
-				if self:RetiraAresta(vertA, vertB) then
-					self:RetiraAresta(vertB, vertA)
-					print("Aresta "..vertA.."-"..vertB.." foi removida.")
+				if self.lista[vertA] and self.lista[vertB] then
+	 				if self:RetiraAresta(vertA, vertB) then
+						self:RetiraAresta(vertB, vertA)
+						print("Aresta "..vertA.."-"..vertB.." foi removida.")
+					else
+						print("Vertices invalidos!")
+					end
 				else
 					print("Vertices invalidos!")
 				end
-				
 			end
 
 			function listaAdj:ImprimeVizinhosDoVerticie( vert )
@@ -152,8 +155,8 @@ local ListaAdj = {}
 							linha 	= linha .. aresta.vertice .. " "
 							aresta 	= aresta.proximo
 						end
-						print(linha)
 					end
+					print(linha)
 				end
 			end
 
