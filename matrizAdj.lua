@@ -1,36 +1,39 @@
 local MatrizAdj = {}
 	
-	function MatrizAdj:new( grafo )
-		-- body
+	function MatrizAdj:novo( nome, n, m )
 		local matrizAdj = {}
-		-- copia nome e vertices
-		matrizAdj.nome 		= grafo.nome
-		matrizAdj.vertices 	= grafo.vertices
-		matrizAdj.matriz 	= {}
+		matrizAdj.nome 		= nome
+		matrizAdj.tipo		= "Matriz de Adjacencia"
+		matrizAdj.visitado		= {}
+		matrizAdj.explorada 	= {}
+		matrizAdj.descoberta 	= {}
+		matrizAdj.matriz 		= {}
 
 			function matrizAdj:AdicionaVertice( )
-				-- adiciona uma coluna em cada linha com 0
 				for i = 1, #self.matriz do
 					table.insert(self.matriz[i], 0)
+					table.insert(self.visitado[i], 0)
+					table.insert(self.explorada[i], 0)
+					table.insert(self.descoberta[i], 0)
 				end
-				-- adiciona uma linha com 0s
 				table.insert(self.matriz, {})
+				table.insert(self.visitado, 0)
+				table.insert(self.explorada, {})
+				table.insert(self.descoberta, {})
 				for i = 1, #self.matriz do
 					table.insert(self.matriz[#self.matriz], 0)
+					table.insert(self.explorada[#self.matriz], 0)
+					table.insert(self.descoberta[#self.matriz], 0)
 				end
 				print("Vertice "..#self.matriz.." foi adicionado.")
 			end
 
 			function matrizAdj:RemoveVertice( vert )
-				-- em cada linha, salva o valor da ultima coluna na coluna do vertice a ser removido
-				-- em seguida, remove a ultima coluna de cada linha
 				if self.matriz[vert] then
 					for i = 1, #self.matriz do
 						self.matriz[i][vert] = self.matriz[i][#self.matriz]
 						table.remove(self.matriz[i])
 					end
-					-- em cada coluna, salva o valor da ultima linha na linha do vertice a ser removido
-					-- em seguida remove a ultima linha
 					for i = 1, #self.matriz[vert] do
 						self.matriz[vert][i] = self.matriz[#self.matriz][i]
 					end
@@ -91,19 +94,18 @@ local MatrizAdj = {}
 				end
 			end
 
-
-		-- cria vertices em sequencia
-		for i = 1, #grafo.vertices do
+		local vertices = n or 0
+		for i = 1, vertices do
 			matrizAdj.matriz[i] = {}
-			for j = 1, #grafo.vertices do
+			for j = 1, vertices do
 				matrizAdj.matriz[i][j] = 0
 			end
 		end
 
-		-- cria inicia as arestas
-		for i = 1, #grafo.arestas do
-			local indexA = tonumber(grafo.arestas[i][1])
-			local indexB = tonumber(grafo.arestas[i][2])
+		local arestas = m or {}
+		for i = 1, #arestas do
+			local indexA = tonumber(arestas[i][1])
+			local indexB = tonumber(arestas[i][2])
 			matrizAdj:AdicionaAresta(indexA, indexB)
 		end
 
