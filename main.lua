@@ -256,57 +256,92 @@ local Lista		= require("listaAdj")
 					if tonumber(entrada) then
 						local vertInicial = tonumber(entrada)
 						grafoSelecionado:BuscaUnicaLargura(vertInicial, true)
+						local start = os.clock()
+						grafoSelecionado:BuscaUnicaLargura(vertInicial, false)
+						print("Tempo de execução ".. os.clock() - start)
+
 					else
 						Valor_Invalido()
 					end
 				elseif opcao == 2 then
 					grafoSelecionado:BuscaCompletaLargura(true)
+					local start = os.clock()
+					grafoSelecionado:BuscaCompletaLargura(false)
+					print("Tempo de execução ".. os.clock() - start)
 
 				elseif opcao == 3 then
-					grafoSelecionado:BuscaUnicaProfundidade(1, false)
+					local start = os.clock()
+					grafoSelecionado:BuscaUnicaLargura(1, false)
 					if grafoSelecionado:EhConexo() then
 						print("Conexo")
 					else
 						print("Desconexo")
 					end
+					print("Tempo de execução ".. os.clock() - start)
+
 				elseif opcao == 4 then
-					grafoSelecionado:BuscaCompletaProfundidade(false)
+					local start = os.clock()
+					grafoSelecionado:BuscaCompletaLargura(false)
 					if grafoSelecionado:TemCiclo() then
 						print("Tem ciclo")
 					else
 						print("Não tem ciclo")
 					end
+					print("Tempo de execução ".. os.clock() - start)
+
 				elseif opcao == 5 then
-					grafoSelecionado:BuscaCompletaProfundidade(false)
+					local start = os.clock()
+					grafoSelecionado:BuscaCompletaLargura(false)
 					if grafoSelecionado:TemCiclo() then
 						print("Não é floresta")
 					else
 						print("É floresta")
 					end
+					print("Tempo de execução ".. os.clock() - start)
+
 				elseif opcao == 6 then
-					grafoSelecionado:BuscaCompletaProfundidade(false)
+					local start = os.clock()
+					grafoSelecionado:BuscaUnicaLargura(1, false)
 					if grafoSelecionado:EhArvore() then
 						print("É árvore")
 					else
 						print("Não é árvore")
 					end
+					print("Tempo de execução ".. os.clock() - start)
+
 				elseif opcao == 7 then
-					grafoSelecionado:BuscaCompletaProfundidade(false)
-					if (not(grafoSelecionado:TemCiclo())) and grafoSelecionado:EhConexo() then
-						print("É árvore")
+					local start = os.clock()
+					grafoSelecionado:BuscaUnicaLargura(1, false)
+					if (not(grafoSelecionado:TemCiclo())) then
+						grafoSelecionado:BuscaUnicaLargura(1, false)
+						if grafoSelecionado:EhConexo() then
+							print("É árvore")
+						else
+							print("Não é árvore")
+						end
 					else
 						print("Não é árvore")
 					end
+					print("Tempo de execução ".. os.clock() - start)
+
 				elseif opcao == 8 then
-					grafoSelecionado:BuscaCompletaProfundidade(false)
+					local start = os.clock()
+					grafoSelecionado:BuscaCompletaLargura(false)
 					grafoSelecionado:ObterFlorestaGeradora()
+					local endt = os.clock()
+					grafoSelecionado:ImprimeGrafo(grafoSelecionado.floresta)
+					print("Tempo de execução ".. endt - start)
+
 				elseif opcao == 9 then
 					print("Insira vertice de referencia: ")
 					entrada = io.read("*line")
 					if tonumber(entrada) then
 						local vertRef = tonumber(entrada)
+						local start = os.clock()
 						if grafoSelecionado:DeterminarDistancias(vertRef, false) then
+							local endt = os.clock()
 							grafoSelecionado:ImprimeDistancia(vertRef)
+							print("Tempo de execução ".. endt - start)
 						else
 							print("Vertice invalidos!")
 						end
@@ -336,7 +371,7 @@ local Lista		= require("listaAdj")
 			print("7 - Verificar se é floresta")
 			print("8 - Verificar se é árvore")
 			print("9 - Verificar se é árvore 2")
-			print("9 - Floresta Geradora")
+			print("10 - Floresta Geradora")
 			print("0 - Voltar")
 			print()
 			print("Digite a opção desejada: ")
@@ -350,6 +385,10 @@ local Lista		= require("listaAdj")
 					if tonumber(entrada) then
 						local vertInicial = tonumber(entrada)
 						grafoSelecionado:BuscaUnicaProfundidade(vertInicial, true)
+						local start = os.clock()
+						grafoSelecionado:BuscaUnicaProfundidade(vertInicial, false)
+						print("Tempo de execução ".. os.clock() - start)
+
 					else
 						Valor_Invalido()
 					end
@@ -359,53 +398,88 @@ local Lista		= require("listaAdj")
 					if tonumber(entrada) then
 						local vertInicial = tonumber(entrada)
 						grafoSelecionado:BuscaUnicaProfundidadeRecur(vertInicial, true)
+						local start = os.clock()
+						grafoSelecionado:BuscaUnicaProfundidadeRecur(vertInicial, false)
+						print("Tempo de execução ".. os.clock() - start)
+
 					else
 						Valor_Invalido()
 					end
 				elseif opcao == 3 then
 					grafoSelecionado:BuscaCompletaProfundidade(true)
+					local start = os.clock()
+					grafoSelecionado:BuscaCompletaProfundidade(false)
+					print("Tempo de execução ".. os.clock() - start)
 
 				elseif opcao == 4 then
 					grafoSelecionado:BuscaCompletaProfundidadeRecur(true)
+					local start = os.clock()
+					grafoSelecionado:BuscaCompletaProfundidadeRecur(false)
+					print("Tempo de execução ".. os.clock() - start)
 
 				elseif opcao == 5 then
+					local start = os.clock()
 					grafoSelecionado:BuscaUnicaProfundidade(1, false)
 					if grafoSelecionado:EhConexo() then
 						print("Conexo")
 					else
 						print("Desconexo")
 					end
+					print("Tempo de execução ".. os.clock() - start)
+
 				elseif opcao == 6 then
+					local start = os.clock()
 					grafoSelecionado:BuscaCompletaProfundidade(false)
 					if grafoSelecionado:TemCiclo() then
 						print("Tem ciclo")
 					else
 						print("Não tem ciclo")
 					end
+					print("Tempo de execução ".. os.clock() - start)
+
 				elseif opcao == 7 then
+					local start = os.clock()
 					grafoSelecionado:BuscaCompletaProfundidade(false)
 					if grafoSelecionado:TemCiclo() then
 						print("Não é floresta")
 					else
 						print("É floresta")
 					end
+					print("Tempo de execução ".. os.clock() - start)
+
 				elseif opcao == 8 then
-					grafoSelecionado:BuscaCompletaProfundidade(false)
+					local start = os.clock()
+					grafoSelecionado:BuscaUnicaProfundidade(1, false)
 					if grafoSelecionado:EhArvore() then
 						print("É árvore")
 					else
 						print("Não é árvore")
 					end
+					print("Tempo de execução ".. os.clock() - start)
+
 				elseif opcao == 9 then
-					grafoSelecionado:BuscaCompletaProfundidade(false)
-					if (not(grafoSelecionado:TemCiclo())) and grafoSelecionado:EhConexo() then
-						print("É árvore")
+					local start = os.clock()
+					grafoSelecionado:BuscaUnicaProfundidade(1, false)
+					if grafoSelecionado:EhConexo() then
+						grafoSelecionado:BuscaUnicaProfundidade(1, false)
+						if not(grafoSelecionado:TemCiclo()) then
+							print("É árvore")
+						else
+							print("Não é árvore")
+						end
 					else
 						print("Não é árvore")
 					end
+					print("Tempo de execução ".. os.clock() - start)
+
 				elseif opcao == 10 then
+					local start = os.clock()
 					grafoSelecionado:BuscaCompletaProfundidade(false)
 					grafoSelecionado:ObterFlorestaGeradora()
+					local endt = os.clock()
+					grafoSelecionado:ImprimeGrafo(grafoSelecionado.floresta)
+					print("Tempo de execução ".. endt - start)
+
 				elseif opcao == 0 then
 					break
 				end

@@ -382,6 +382,11 @@ local ListaAdj = {}
 			end
 
 			function listaAdj:EhArvore( )
+				for i = 1, #self.visitado do
+					if not(self.visitado[i]) then
+						return false
+					end
+				end
 				for i = 1, #self.lista do
 					local aresta = self.lista[i]
 					while aresta do
@@ -391,11 +396,6 @@ local ListaAdj = {}
 							end
 						end
 						aresta = aresta.proximo
-					end
-				end
-				for i = 1, #self.visitado do
-					if not(self.visitado[i]) then
-						return false
 					end
 				end
 				return true
@@ -426,11 +426,11 @@ local ListaAdj = {}
 			end
 
 			function listaAdj:ObterFlorestaGeradora(  )
-				self.floresta = ListaAdj:novo("Floresta Geradora", #self.lista)
-				self.floresta.lista 		= {}
+				self.floresta 		= ListaAdj:novo("Floresta Geradora", #self.lista)
+				self.floresta.lista = {}
 				for i = 1, #self.lista do
-					self.floresta.lista[i] = {}
-					self.floresta.visitado[i] = false;
+					self.floresta.lista[i] 		= {}
+					self.floresta.visitado[i] 	= false;
 				end
 
 				for i = 1, #self.lista do
@@ -444,14 +444,13 @@ local ListaAdj = {}
 						aresta = aresta.proximo
 					end
 				end
-				self:ImprimeGrafo(self.floresta)
 			end
 
 			local vertices = n or 0
 			for i = 1, vertices do
-				listaAdj.lista[i] = {}
-				listaAdj.visitado[i] = false;
-				listaAdj.distancia[i] = 0;
+				listaAdj.lista[i] 		= {}
+				listaAdj.visitado[i] 	= false;
+				listaAdj.distancia[i] 	= 0;
 			end
 
 			local arestas = m or {}
