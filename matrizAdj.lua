@@ -9,6 +9,8 @@ local MatrizAdj = {}
 		matrizAdj.explorada 	= {}
 		matrizAdj.descoberta 	= {}
 		matrizAdj.matriz 		= {}
+		matrizAdj.inicio 		= 0
+		matrizAdj.fim 			= 0
 
 			function matrizAdj:AdicionaVertice( )
 				for i = 1, #self.matriz do
@@ -266,7 +268,7 @@ local MatrizAdj = {}
 			function matrizAdj:BuscaCompletaProfundidadeRecur( exibir )
 				self:IniciaBusca()
 				for i = 1, #self.matriz do
-					self:BuscaProfundidade(i, exibir)
+					self:BuscaProfundidadeRecur(i, exibir)
 				end
 			end
 

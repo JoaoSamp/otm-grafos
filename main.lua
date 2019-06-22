@@ -117,6 +117,29 @@ local Lista		= require("listaAdj")
 						end
 					end
 					print("\n"..grafoSelecionado.nome.." selecionado com sucesso - "..grafoSelecionado.tipo)
+
+					local opcao = 0
+					while opcao ~= 1 or opcao ~= 2 do
+						print("Inicia capacitado:")
+						print("1 - Sim")
+						print("2 - Não")
+						local entrada = io.read("*line")
+						if tonumber(entrada) then
+							opcao = tonumber(entrada)
+							if opcao == 1 then
+								grafoSelecionado:InicializaGrafoCapacitado( 
+																grafosLidos[grafoSelec].inicio, 
+																grafosLidos[grafoSelec].fim )
+								break
+							elseif opcao == 2 then
+								print("Grafo não foi capacitado")
+								break
+							else
+								Valor_Invalido()
+							end
+						end
+					end
+
 					break
 				elseif grafoSelec == #grafosLidos + 1 then
 					if not(Leitura()) then
@@ -496,6 +519,7 @@ local Lista		= require("listaAdj")
 			print("Algoritmos:")
 			print("1 - Utilizando Busca em Largura")
 			print("2 - Utilizando Busca em Profundidade")
+			print("3 - Fluxo Maximo")
 			print("0 - Voltar")
 			print()
 			print("Digite a opção desejada: ")
@@ -507,6 +531,12 @@ local Lista		= require("listaAdj")
 					AlgBuscaLargura()
 				elseif opcao == 2 then
 					AlgBuscaProfundidade()
+				elseif opcao == 3 then
+					if grafoSelecionado.capacitado == true then
+						print("O fluxo máximo é "..grafoSelecionado:FluxoMaximo( ))
+					else
+						print("O grafo não é um grafo capacitado")
+					end
 				elseif opcao == 0 then
 					break
 				end

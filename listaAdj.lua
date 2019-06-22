@@ -1,5 +1,16 @@
 local ListaAdj = {}
 	
+	function ListaAdj:NovaArestaFluxo( vertice, cap, fluxo, tipo )
+		local aresta = {}
+		aresta.vertice 		= vertice
+		aresta.capacidade	= cap
+		aresta.fluxo 		= fluxo
+		aresta.tipo			= tipo or 1
+		aresta.gemeo		= {}
+		aresta.proximo 		= {}
+		return aresta
+	end
+
 	function ListaAdj:NovaAresta( vertice )
 		local aresta = {}
 		aresta.vertice 		= vertice
@@ -17,7 +28,10 @@ local ListaAdj = {}
 		listaAdj.distancia 	= {}
 		listaAdj.lista 		= {}
 		listaAdj.floresta 	= {}
-		listaAdj.proximoVizinho 	= {}
+		listaAdj.inicio 	= 0
+		listaAdj.fim 		= 0
+		listaAdj.capacitado = false
+
 
 			function listaAdj:AdicionaVertice( )
 				table.insert(self.lista, {})
@@ -26,7 +40,7 @@ local ListaAdj = {}
 				return #self.lista
 			end
 
-			function listaAdj:RemoveVertice( vert, exibir )
+			function listaAdj:RemoveVertice( vert )
 				if self.lista[vert] then
 					local vizinho = self.lista[vert];
 					while vizinho.vertice do
@@ -162,6 +176,9 @@ local ListaAdj = {}
 						linha = linha .. " - "
 						while aresta.vertice do
 							linha 	= linha .. aresta.vertice .. " "
+							if self.capacitado then
+								linha = linha .. "Cap("..aresta.capacidade..") "
+							end
 							aresta 	= aresta.proximo
 						end
 					end
@@ -377,7 +394,7 @@ local ListaAdj = {}
 			function listaAdj:BuscaCompletaProfundidadeRecur( exibir )
 				self:IniciaBusca()
 				for i = 1, #self.lista do
-					self:BuscaProfundidade(i, exibir)
+					self:BuscaProfundidadeRecur(i, exibir)
 				end
 			end
 
@@ -444,6 +461,162 @@ local ListaAdj = {}
 						aresta = aresta.proximo
 					end
 				end
+			end
+
+			function listaAdj:AdicionaArestaCapacitada( vertA, vertB, cap, fluxo, tipo )
+				if self.lista[vertA] and self.lista[vertB] then
+					local aresta 			= self.lista[vertA]
+					local arestaAnterior 	= nil
+					while true do
+						if aresta.vertice == nil then
+							local aresta = ListaAdj:NovaArestaFluxo(vertB, cap, fluxo, tipo)
+							if arestaAnterior == nil then
+								self.lista[vertA] = aresta
+							else
+								arestaAnterior.proximo = aresta
+							end
+							return true, aresta
+						else
+							if aresta.vertice == vertB then
+								return false
+							end
+						end
+						arestaAnterior 	= aresta
+						aresta 			= aresta.proximo
+					end	
+				else
+					return false
+				end
+			end
+
+			function listaAdj:InicializaGrafoCapacitado ( inicio, fim )
+				self.inicio = inicio
+				self.fim = fim
+				for i = 1, #self.lista do
+					self.lista[i] 		= {}
+					self.visitado[i] 	= false;
+				end
+
+				local arestas = m or {}
+				for i = 1, #arestas do
+					local indexA = tonumber(arestas[i][1])
+					local indexB = tonumber(arestas[i][2])
+					local capacidade = tonumber(arestas[i][3])
+					self:AdicionaArestaCapacitada(indexA, indexB, capacidade, 0, 1)
+				end
+				self.capacitado = true
+			end
+
+			function listaAdj:CaminhoAumentador( )
+				self:IniciaBusca()
+				local fila 	= {}
+				table.insert(fila, {vertice = self.inicio, anterior = nil, capResid = -1})
+				self:MarcaVisitado(self.inicio)
+				local caminhoCompleto = false
+				while #fila > 0 and not(caminhoCompleto) do
+					local elementoFila 	= table.remove(fila, 1)
+					local vertVisitado 	= elementoFila.vertice
+					local aresta 		= self.lista[vertVisitado]
+					while aresta do
+						if aresta.vertice then
+							local capResid = aresta.capacidade - aresta.fluxo
+							if not(self.visitado[aresta.vertice]) and (capResid > 0) then
+								table.insert(fila, {vertice = aresta.vertice, anterior = elementoFila, capResidual = capResid})
+								self:MarcaVisitado( aresta.vertice )
+								if aresta.vertice == self.fim then
+									caminhoCompleto = true
+									break
+								end
+							end
+						end
+						aresta = aresta.proximo
+					end
+				end
+				if not(self.visitado[self.fim]) then
+					return 0, nil
+				end
+				local caminho = {}
+				local capacidade = -1
+				local ultimoElemento = table.remove(fila)
+				local delta = -1
+				while ultimoElemento do
+					if ultimoElemento.capResidual then
+						if delta == -1 then
+							delta = ultimoElemento.capResidual
+						elseif ultimoElemento.capResidual > 0 and ultimoElemento.capResidual < delta then
+							delta = ultimoElemento.capResidual
+						end
+					end
+					table.insert(caminho, 1, ultimoElemento.vertice)
+					ultimoElemento = ultimoElemento.anterior
+				end
+				return delta, caminho
+			end
+
+			function listaAdj:AtualizaFluxo( vertA, vertB, deltaFluxo )
+				local aresta = self.lista[vertA]
+				while aresta.proximo do
+					if aresta.vertice == vertB then
+						aresta.fluxo 		= aresta.fluxo + deltaFluxo
+						aresta.gemeo.fluxo 	= aresta.gemeo.fluxo - deltaFluxo
+						break
+					end
+					aresta = aresta.proximo
+				end
+			end
+
+			function listaAdj:Expandir( )
+				for i=1, #self.lista do
+					local aresta = self.lista[i]
+					while aresta.proximo do
+						if aresta.vertice and aresta.tipo == 1 then
+							local sucesso, arestaArtificial = self:AdicionaArestaCapacitada(aresta.vertice, i, 0, -aresta.fluxo, -1)
+							aresta.gemeo 			= arestaArtificial
+							arestaArtificial.gemeo 	= aresta
+						end
+						aresta = aresta.proximo
+					end
+				end
+			end
+
+			function listaAdj:Contrair( )
+				for i=1, #self.lista do
+					local aresta = self.lista[i]
+					while aresta.proximo do
+						if aresta.vertice and aresta.tipo == -1 then
+							self:RetiraAresta( i, aresta.vertice )
+						end
+						aresta = aresta.proximo
+					end
+				end
+			end
+
+			function listaAdj:FluxoMaximo( )
+				self:Expandir()
+
+				for i=1, #self.lista do
+					local aresta = self.lista[i]
+					while aresta.proximo do
+						if aresta.vertice and aresta.tipo == -1 then
+							aresta.fluxo = 0
+						end
+						aresta = aresta.proximo
+					end
+				end
+				local intensidade = 0
+				local delta, caminho = self:CaminhoAumentador()
+				while delta > 1 do
+					local linha = "Caminho "
+					for i = 1, #caminho - 1 do
+						self:AtualizaFluxo( caminho[i], caminho[i+1], delta )
+						linha = linha .. caminho[i]
+					end
+					print(linha .. caminho[#caminho].." - Cap("..delta..")")
+					intensidade = intensidade + delta
+					delta, caminho = self:CaminhoAumentador()
+				end
+				self:Contrair()
+				return intensidade
 			end
 
 			local vertices = n or 0
