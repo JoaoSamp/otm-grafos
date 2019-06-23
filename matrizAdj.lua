@@ -9,6 +9,9 @@ local MatrizAdj = {}
 		matrizAdj.explorada 	= {}
 		matrizAdj.descoberta 	= {}
 		matrizAdj.matriz 		= {}
+		matrizAdj.fluxo 		= {}
+		matrizAdj.capacidade 	= {}
+		matrizAdj.artificial	= {}
 		matrizAdj.inicio 		= 0
 		matrizAdj.fim 			= 0
 
@@ -325,6 +328,140 @@ local MatrizAdj = {}
 						end
 					end
 				end
+			end
+
+
+			function matrizAdj:AdicionaArestaCapacitada( vertA, vertB, cap, fluxo, tipo )
+				if (self.matriz[vertA]) and (self.matriz[vertB]) and 
+					(vertA ~= vertB) and (self.matriz[vertA][vertB] == 0) then
+					self.matriz[vertA][vertB] 		= tipo
+					self.capacidade[vertA][vertB] 	= cap
+					self.fluxo[vertA][vertB] 		= fluxo
+					return true
+				end
+				return false
+			end
+
+			function matrizAdj:InicializaGrafoCapacitado ( inicio, fim )
+				self.inicio = inicio
+				self.fim = fim
+
+				for i = 1, #self.matriz do
+					self.matriz[i]  	= {}
+					self.capacidade[i] 	= {}
+					self.fluxo[i]  		= {}
+					for j = 1, #self.matriz do
+						self.matriz[i][j] 		= 0
+						self.capacidade[i][j] 	= 0
+						self.fluxo[i][j] 		= 0
+					end
+				end
+
+				local arestas = m or {}
+				for i = 1, #arestas do
+					local indexA = tonumber(arestas[i][1])
+					local indexB = tonumber(arestas[i][2])
+					local capacidade = tonumber(arestas[i][3])
+					self:AdicionaArestaCapacitada(indexA, indexB, capacidade, 0, 1)
+				end
+				self.capacitado = true
+			end
+
+			function matrizAdj:CaminhoAumentador( )
+				self:IniciaBusca()
+				local fila 	= {}
+				table.insert(fila, {vertice = self.inicio, anterior = nil, capResid = -1})
+				self:MarcaVisitado(self.inicio)
+				local caminhoCompleto = false
+				while #fila > 0 and not(caminhoCompleto) do
+					local elementoFila 	= table.remove(fila, 1)
+					local vertVisitado 	= elementoFila.vertice
+					for vizinho = 1, #self.matriz do
+						if self.matriz[vertVisitado][vizinho] ~=0 then
+							local capResid = self.capacidade[vertVisitado][vizinho] - self.fluxo[vertVisitado][vizinho]
+							if not(self.visitado[vizinho]) and (capResid > 0) then
+								table.insert(fila, {vertice = vizinho, anterior = elementoFila, capResidual = capResid})
+								self:MarcaVisitado( vizinho )
+								if vizinho == self.fim then
+									caminhoCompleto = true
+									break
+								end
+							end
+						end
+					end
+				end
+				if not(self.visitado[self.fim]) then
+					return 0, nil
+				end
+				local caminho = {}
+				local capacidade = -1
+				local ultimoElemento = table.remove(fila)
+				local delta = -1
+				while ultimoElemento do
+					if ultimoElemento.capResidual then
+						if delta == -1 then
+							delta = ultimoElemento.capResidual
+						elseif ultimoElemento.capResidual > 0 and ultimoElemento.capResidual < delta then
+							delta = ultimoElemento.capResidual
+						end
+					end
+					table.insert(caminho, 1, ultimoElemento.vertice)
+					ultimoElemento = ultimoElemento.anterior
+				end
+				return delta, caminho
+			end
+
+			function matrizAdj:AtualizaFluxo( vertA, vertB, deltaFluxo )
+				self.fluxo[vertA][vertB] = self.fluxo[vertA][vertB] + deltaFluxo
+				self.fluxo[vertB][vertA] = self.fluxo[vertB][vertA] - deltaFluxo
+			end
+
+			function matrizAdj:Expandir( )
+				for i=1, #self.matriz do
+					for l=1, #self.matriz do
+						if self.matriz[i][l] == 1 then
+							self.fluxo[i][l] = 0
+							if not(self:AdicionaArestaCapacitada(l, i, 0, -self.fluxo[i][l], -1)) then
+								return false
+							end
+						end
+					end
+				end
+				return true
+			end
+
+			function matrizAdj:Contrair( )
+				for i=1, #self.matriz do
+					for l=1, #self.matriz do
+						if self.matriz[i][l] == -1 then
+							self.matriz[i][l] = 0
+						end
+					end
+				end
+			end
+
+			function matrizAdj:FluxoMaximo( )
+				if not (self:Expandir()) then
+					print("Grafo capacitado inválido")
+					return 0, false
+				end
+				local intensidade = 0
+				local delta
+				local caminho
+				
+				delta, caminho = self:CaminhoAumentador()
+				while delta > 1 do
+					local linha = "Caminho "
+					for i = 1, #caminho - 1 do
+						self:AtualizaFluxo( caminho[i], caminho[i+1], delta )
+						linha = linha .. caminho[i].."-"
+					end
+					print(linha .. caminho[#caminho].." - Cap("..delta..")")
+					intensidade = intensidade + delta
+					delta, caminho = self:CaminhoAumentador()
+				end
+				self:Contrair()
+				return intensidade, true
 			end
 
 

@@ -520,6 +520,9 @@ local ListaAdj = {}
 					while aresta do
 						if aresta.vertice then
 							local capResid = aresta.capacidade - aresta.fluxo
+							if aresta.tipo == -1 and ((not(self.visitado[aresta.vertice])) and (capResid > 0)) then
+								print( aresta.vertice, elementoFila.vertice )
+							end
 							if not(self.visitado[aresta.vertice]) and (capResid > 0) then
 								table.insert(fila, {vertice = aresta.vertice, anterior = elementoFila, capResidual = capResid})
 								self:MarcaVisitado( aresta.vertice )
@@ -570,13 +573,18 @@ local ListaAdj = {}
 					local aresta = self.lista[i]
 					while aresta.proximo do
 						if aresta.vertice and aresta.tipo == 1 then
+							aresta.fluxo = 0
 							local sucesso, arestaArtificial = self:AdicionaArestaCapacitada(aresta.vertice, i, 0, -aresta.fluxo, -1)
-							aresta.gemeo 			= arestaArtificial
-							arestaArtificial.gemeo 	= aresta
+							if sucesso then
+								aresta.gemeo 			= arestaArtificial
+								arestaArtificial.gemeo 	= aresta
+							else return false
+							end
 						end
 						aresta = aresta.proximo
 					end
 				end
+				return true
 			end
 
 			function listaAdj:Contrair( )
@@ -592,31 +600,27 @@ local ListaAdj = {}
 			end
 
 			function listaAdj:FluxoMaximo( )
-				self:Expandir()
-
-				for i=1, #self.lista do
-					local aresta = self.lista[i]
-					while aresta.proximo do
-						if aresta.vertice and aresta.tipo == -1 then
-							aresta.fluxo = 0
-						end
-						aresta = aresta.proximo
-					end
+				if not (self:Expandir()) then
+					print("Grafo capacitado inválido")
+					return 0, false
 				end
 				local intensidade = 0
-				local delta, caminho = self:CaminhoAumentador()
+				local delta
+				local caminho
+				
+				delta, caminho = self:CaminhoAumentador()
 				while delta > 1 do
 					local linha = "Caminho "
 					for i = 1, #caminho - 1 do
 						self:AtualizaFluxo( caminho[i], caminho[i+1], delta )
-						linha = linha .. caminho[i]
+						linha = linha .. caminho[i].."-"
 					end
 					print(linha .. caminho[#caminho].." - Cap("..delta..")")
 					intensidade = intensidade + delta
 					delta, caminho = self:CaminhoAumentador()
 				end
 				self:Contrair()
-				return intensidade
+				return intensidade, true
 			end
 
 			local vertices = n or 0

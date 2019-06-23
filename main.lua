@@ -533,7 +533,12 @@ local Lista		= require("listaAdj")
 					AlgBuscaProfundidade()
 				elseif opcao == 3 then
 					if grafoSelecionado.capacitado == true then
-						print("O fluxo máximo é "..grafoSelecionado:FluxoMaximo( ))
+						local start = os.clock()
+						local fluxo, sucesso = grafoSelecionado:FluxoMaximo( )
+						if sucesso then
+							print("O fluxo máximo é ".. fluxo)
+							print("Tempo de execução ".. os.clock() - start)
+						end
 					else
 						print("O grafo não é um grafo capacitado")
 					end
