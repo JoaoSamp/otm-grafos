@@ -12,7 +12,7 @@ function AdcAresta( matriz, vertA, vertB )
 end
 
 function AdcArestaDir( matriz, vertA, vertB, capacidade )
-	if matriz[vertA] and matriz[vertB] and matriz[vertA][vertB] == 0 and matriz[vertB][vertA] == 0 then
+	if (vertA ~= vertB) and matriz[vertA] and matriz[vertB] and matriz[vertA][vertB] == 0 and matriz[vertB][vertA] == 0 then
 		matriz[vertA][vertB] = capacidade
 		return true
 	else
@@ -90,15 +90,6 @@ function GeraGrafo( n, seed, tipo )
 	return grafo
 end
 
-function IsIn( tabela, valor )
-	for i, v in ipairs(tabela) do
-		if v == valor then
-			return true
-		end
-	end
-	return false
-end
-
 function GeraGrafoCapacitado( n, seed )
 	math.randomseed(seed)
 	local grafo = {}
@@ -110,49 +101,57 @@ function GeraGrafoCapacitado( n, seed )
 		table.insert(grafo.vertices, i)
 	end
 
-	grafo.inicio = math.random(n)
-	local fim = math.random(n)
-	while fim == grafo.inicio do
-		fim = math.random(n)
-	end
-	grafo.fim = fim
+	grafo.inicio = 1
+	grafo.fim = n
 
 	local grafoMatAdj = Matriz:novo(grafo.nome, n)
-
-	local qtd_caminhos = math.floor(n/5) * 2
-	for i = 1, qtd_caminhos do
-		local qtd_vertices = n - qtd_caminhos
-		local caminho = {}
-		table.insert(caminho, grafo.inicio)
-		for l = 1, qtd_vertices - 2 do
-			local novo_vertice = 0
-			local tentativa = 0
-			while (novo_vertice == 0) or (novo_vertice == grafo.inicio )
-				or ( novo_vertice == grafo.fim ) or ( IsIn( caminho, novo_vertice)) do
-				novo_vertice = math.random(n)
-				if tentativa < 10  then
-					if n > 10 then
-						if grafoMatAdj.matriz[grafo.inicio][novo_vertice] > 0 
-							or grafoMatAdj.matriz[novo_vertice][grafo.fim] > 0 then
-							novo_vertice = 0 
-						end
-					end
-					if #caminho > 0 and novo_vertice > 0 then
-						if grafoMatAdj.matriz[caminho[#caminho]][novo_vertice] > 0 then
-							novo_vertice = 0
-						end
-					end
-					tentativa = tentativa + 1
-				else
-					tentativa = 0
+	local vert_por_nivel = 0
+	if n < 10  then
+		vert_por_nivel = 2
+	elseif n < 30 then
+		vert_por_nivel = 3
+	elseif n < 100 then 
+		vert_por_nivel = 4
+	else
+		vert_por_nivel = 5
+	end
+	local niveis 		= {}
+	table.insert(niveis, {grafo.inicio})
+	local qtd_niveis 	= 1
+	local vertices 	= n - 1
+	local vertice 	= 2
+	while vertices > 1 do
+		local vert_no_nivel = 0
+		if vertices - vert_por_nivel >= (vert_por_nivel * 2) then
+			vert_no_nivel = vert_por_nivel
+		else
+			vert_no_nivel = vertices - 1
+		end
+		table.insert(niveis, {})
+		for i = 1, vert_no_nivel do
+			table.insert(niveis[#niveis], vertice)
+			vertice = vertice + 1
+		end
+		vertices = vertices - vert_no_nivel
+		qtd_niveis = qtd_niveis + 1
+	end
+	table.insert(niveis, {grafo.fim})
+	for i = 1, #niveis - 1 do
+		for l = 1, #niveis[i] do
+			for k = 1, #niveis[i+1] do
+				local capacidade = math.random(15) + 5
+				AdcArestaDir(grafoMatAdj.matriz, niveis[i][l], niveis[i + 1][k], capacidade)
+			end
+		end
+	end
+	for i = 1, #niveis do
+		for l = 1, #niveis[i] do
+			for k = 1, #niveis[i] do
+				if math.random(1000) % 5 == 0 then
+					local capacidade = math.random(5) + 3
+					AdcArestaDir(grafoMatAdj.matriz, niveis[i][l], niveis[i][k], capacidade)
 				end
 			end
-			table.insert(caminho, novo_vertice)
-		end
-		table.insert(caminho, grafo.fim)
-		for l = 2, (#caminho) do
-			local capacidade = math.random(12) + 3
-			AdcArestaDir( grafoMatAdj.matriz, caminho[l-1], caminho[l], capacidade )
 		end
 	end
 
@@ -251,6 +250,16 @@ jsGrafo = json.encode(grafoObj)
 file:write(jsGrafo)
 file:write("\n")
 
+grafoObj = GeraGrafoCapacitado(8, 79659, 'aleatorio')
+jsGrafo = json.encode(grafoObj)
+file:write(jsGrafo)
+file:write("\n")
+
+grafoObj = GeraGrafoCapacitado(9, 9971239, 'aleatorio')
+jsGrafo = json.encode(grafoObj)
+file:write(jsGrafo)
+file:write("\n")
+
 grafoObj = GeraGrafoCapacitado(10, 5594169, 'aleatorio')
 jsGrafo = json.encode(grafoObj)
 file:write(jsGrafo)
@@ -272,6 +281,11 @@ file:write(jsGrafo)
 file:write("\n")
 
 grafoObj = GeraGrafoCapacitado(100, 55868965, 'aleatorio')
+jsGrafo = json.encode(grafoObj)
+file:write(jsGrafo)
+file:write("\n")
+
+grafoObj = GeraGrafoCapacitado(1000, 8941698, 'aleatorio')
 jsGrafo = json.encode(grafoObj)
 file:write(jsGrafo)
 file:write("\n")

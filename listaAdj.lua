@@ -520,9 +520,6 @@ local ListaAdj = {}
 					while aresta do
 						if aresta.vertice then
 							local capResid = aresta.capacidade - aresta.fluxo
-							if aresta.tipo == -1 and ((not(self.visitado[aresta.vertice])) and (capResid > 0)) then
-								print( aresta.vertice, elementoFila.vertice )
-							end
 							if not(self.visitado[aresta.vertice]) and (capResid > 0) then
 								table.insert(fila, {vertice = aresta.vertice, anterior = elementoFila, capResidual = capResid})
 								self:MarcaVisitado( aresta.vertice )
@@ -609,7 +606,7 @@ local ListaAdj = {}
 				local caminho
 				
 				delta, caminho = self:CaminhoAumentador()
-				while delta > 1 do
+				while delta >= 1 do
 					local linha = "Caminho "
 					for i = 1, #caminho - 1 do
 						self:AtualizaFluxo( caminho[i], caminho[i+1], delta )
